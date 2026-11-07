@@ -28,29 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            //label1 = new Label();
             lblDatosPersonales = new Label();
             txtNombre = new TextBox();
             label3 = new Label();
-            //label4 = new Label();
             txtApellido = new TextBox();
             label5 = new Label();
             txtDni = new TextBox();
             lblRequisitos = new Label();
             chkAptoMedico = new CheckBox();
-            //chkPagoRecibido = new CheckBox();
             btnGuardar = new Button();
             btnCancelar = new Button();
+            label1 = new Label();
             SuspendLayout();
-            // 
-            // label1
-            // 
-            //label1.AutoSize = true;
-            //label1.Location = new Point(14, 15);
-            //label1.Name = "label1";
-            //label1.Size = new Size(50, 20);
-            //label1.TabIndex = 0;
-            //label1.Text = "label1";
             // 
             // lblDatosPersonales
             // 
@@ -79,17 +68,6 @@
             label3.Size = new Size(64, 20);
             label3.TabIndex = 3;
             label3.Text = "Nombre";
-            // 
-            // label4
-            // 
-            //label4.AutoSize = true;
-            //label4.ForeColor = SystemColors.ControlLightLight;
-            //label4.Location = new Point(16, 149);
-            //label4.Name = "label4";
-            //label4.Size = new Size(66, 20);
-            //label4.TabIndex = 4;
-            //label4.Text = "Apellido";
-            //label4.Click += label4_Click;
             // 
             // txtApellido
             // 
@@ -137,19 +115,6 @@
             chkAptoMedico.TabIndex = 9;
             chkAptoMedico.Text = "Apto Médico";
             chkAptoMedico.UseVisualStyleBackColor = true;
-            //chkAptoMedico.CheckedChanged += checkAptoMedico_CheckedChanged;
-            // 
-            // chkPagoRecibido
-            // 
-            //chkPagoRecibido.AutoSize = true;
-            //chkPagoRecibido.ForeColor = SystemColors.ControlLight;
-            //chkPagoRecibido.Location = new Point(205, 379);
-            //chkPagoRecibido.Name = "chkPagoRecibido";
-            //chkPagoRecibido.Size = new Size(107, 24);
-            //chkPagoRecibido.TabIndex = 10;
-            //chkPagoRecibido.Text = "Pago Cuota";
-            //chkPagoRecibido.UseVisualStyleBackColor = true;
-            //chkPagoRecibido.CheckedChanged += chkPagoRecibido_CheckedChanged;
             // 
             // btnGuardar
             // 
@@ -176,28 +141,35 @@
             btnCancelar.UseVisualStyleBackColor = false;
             btnCancelar.Click += btnCancelar_Click;
             // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.ForeColor = SystemColors.ControlLightLight;
+            label1.Location = new Point(18, 147);
+            label1.Name = "label1";
+            label1.Size = new Size(66, 20);
+            label1.TabIndex = 18;
+            label1.Text = "Apellido";
+            // 
             // FrmAgregarUsuario
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Desktop;
             ClientSize = new Size(800, 514);
+            Controls.Add(label1);
             Controls.Add(btnCancelar);
             Controls.Add(btnGuardar);
-            //Controls.Add(chkPagoRecibido);
             Controls.Add(chkAptoMedico);
             Controls.Add(lblRequisitos);
             Controls.Add(txtDni);
             Controls.Add(label5);
             Controls.Add(txtApellido);
-            //Controls.Add(label4);
             Controls.Add(label3);
             Controls.Add(txtNombre);
             Controls.Add(lblDatosPersonales);
-            //Controls.Add(label1);
             Name = "FrmAgregarUsuario";
             Text = "Agregar Socio";
-            //Load += FrmAgregarUsuario_Load;
             ResumeLayout(false);
             PerformLayout();
         }
@@ -217,5 +189,6 @@
         //private CheckBox chkPagoRecibido;
         private Button btnGuardar;
         private Button btnCancelar;
+        private Label label1;
     }
 }

@@ -267,96 +267,86 @@ namespace PI
 
             RegistrarPago();
         }
+
+
         private void RegistrarPago()
         {
             try
             {
                 Conexion conexion = new Conexion();
 
-                using (MySqlConnection cn =
-                       conexion.ObtenerConexion())
+                int codPago = 0;
+                DateTime fechaPago = DateTime.MinValue;
+                string nombre = "";
+                string apellido = "";
+                string formaPago = "";
+                decimal importe = 0;
+                int mes = 0;
+                int anio = 0;
+
+                using (MySqlConnection cn = conexion.ObtenerConexion())
                 {
                     cn.Open();
 
                     using (MySqlCommand cmd =
-                           new MySqlCommand(
-                               "RegistrarPagoCuota", cn))
+                           new MySqlCommand("RegistrarPagoCuota", cn))
                     {
                         cmd.CommandType =
                             System.Data.CommandType.StoredProcedure;
 
-                        cmd.Parameters.AddWithValue(
-                            "@p_CodUsu", codUsu);
-
+                        cmd.Parameters.AddWithValue("@p_CodUsu", codUsu);
                         cmd.Parameters.AddWithValue(
                             "@p_FormaPago", cmbFormaPago.Text);
 
-                        using (MySqlDataReader reader =
-                               cmd.ExecuteReader())
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
-                            if (reader.Read())
-                            {
-                                int codPago =
-                                    Convert.ToInt32(reader["CodPago"]);
-
-                                DateTime fechaPago =
-                                    Convert.ToDateTime(reader["FechaPago"]);
-
-                                string nombre =
-                                    reader["Nombre"].ToString();
-
-                                string apellido =
-                                    reader["Apellido"].ToString();
-
-                                string formaPago =
-                                    reader["FormaPago"].ToString();
-
-                                decimal importe =
-                                    Convert.ToDecimal(
-                                        reader["ImportePagado"]);
-
-                                int mes =
-                                    Convert.ToInt32(
-                                        reader["PeriodoMes"]);
-
-                                int anio =
-                                    Convert.ToInt32(
-                                        reader["PeriodoAnio"]);
-
-                                MessageBox.Show(
-                                    "Pago registrado correctamente.\n\n" +
-                                    "Número de pago: " + codPago + "\n" +
-                                    "Socio: " + nombre + " " + apellido +
-                                    "\nImporte: " + importe.ToString("C2") +
-                                    "\nPeríodo: " + mes.ToString("00") +
-                                    "/" + anio +
-                                    "\nForma de pago: " + formaPago +
-                                    "\nFecha: " + fechaPago.ToString("dd/MM/yyyy"),
-                                    "Pago registrado",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Information);
-
-                                this.DialogResult = DialogResult.OK;
-                                this.Close();
-                            }
-                            else
+                            if (!reader.Read())
                             {
                                 MessageBox.Show(
-                                    "El procedimiento no devolvió " +
-                                    "los datos del pago.",
+                                    "El procedimiento no devolvió los datos del pago.",
                                     "Error",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Warning);
+
+                                return;
                             }
+
+                            codPago = Convert.ToInt32(reader["CodPago"]);
+                            fechaPago = Convert.ToDateTime(reader["FechaPago"]);
+                            nombre = reader["Nombre"].ToString();
+                            apellido = reader["Apellido"].ToString();
+                            formaPago = reader["FormaPago"].ToString();
+                            importe = Convert.ToDecimal(reader["ImportePagado"]);
+                            mes = Convert.ToInt32(reader["PeriodoMes"]);
+                            anio = Convert.ToInt32(reader["PeriodoAnio"]);
                         }
                     }
                 }
+
+                // El lector y la conexión ya están cerrados.
+                // Abrimos el comprobante con los datos devueltos por el SP.
+
+                using (Comprobante comprobante = new Comprobante(
+                    codPago,
+                    nroSocio,
+                    fechaPago,
+                    nombre,
+                    apellido,
+                    formaPago,
+                    importe,
+                    mes,
+                    anio))
+                {
+                    comprobante.ShowDialog(this);
+                }
+
+                this.DialogResult = DialogResult.OK;
+                this.Close();
             }
             catch (MySqlException ex)
             {
                 MessageBox.Show(
-                    "No se pudo registrar el pago.\n\n" +
-                    ex.Message,
+                    "No se pudo registrar el pago.\n\n" + ex.Message,
                     "Error al registrar",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
@@ -364,13 +354,13 @@ namespace PI
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "Ocurrió un error inesperado:\n" +
-                    ex.Message,
+                    "Ocurrió un error inesperado:\n" + ex.Message,
                     "Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
+
 
         private void btnCancelar_Click(object sender, EventArgs e)
         {
