@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             dgvSocios = new DataGridView();
+            btnDescargarCsv = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvSocios).BeginInit();
             SuspendLayout();
             // 
@@ -44,15 +45,26 @@
             dgvSocios.ReadOnly = true;
             dgvSocios.RowHeadersWidth = 51;
             dgvSocios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvSocios.Size = new Size(800, 450);
+            dgvSocios.Size = new Size(800, 432);
             dgvSocios.TabIndex = 0;
             dgvSocios.CellContentClick += dgvSocios_CellContentClick;
+            // 
+            // btnDescargarCsv
+            // 
+            btnDescargarCsv.Location = new Point(655, 391);
+            btnDescargarCsv.Name = "btnDescargarCsv";
+            btnDescargarCsv.Size = new Size(133, 29);
+            btnDescargarCsv.TabIndex = 1;
+            btnDescargarCsv.Text = "Descargar CSV";
+            btnDescargarCsv.UseVisualStyleBackColor = true;
+            btnDescargarCsv.Click += button1_Click;
             // 
             // FrmSocios
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(800, 432);
+            Controls.Add(btnDescargarCsv);
             Controls.Add(dgvSocios);
             Name = "FrmSocios";
             Text = "Lista de Socios";
@@ -64,5 +76,6 @@
         #endregion
 
         private DataGridView dgvSocios;
+        private Button btnDescargarCsv;
     }
 }

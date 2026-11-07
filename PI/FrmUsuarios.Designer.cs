@@ -32,8 +32,6 @@
             btnAgregarUsuario = new Button();
             lblTitulo = new Label();
             lblMenu = new Label();
-            dgvUsuarios = new DataGridView();
-            ((System.ComponentModel.ISupportInitialize)dgvUsuarios).BeginInit();
             SuspendLayout();
             // 
             // btnListaUsuarios
@@ -82,25 +80,12 @@
             lblMenu.TabIndex = 3;
             lblMenu.Text = "Menú de Gestión de usuarios";
             // 
-            // dgvUsuarios
-            // 
-            dgvUsuarios.AllowUserToAddRows = false;
-            dgvUsuarios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvUsuarios.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvUsuarios.Location = new Point(124, 277);
-            dgvUsuarios.Name = "dgvUsuarios";
-            dgvUsuarios.ReadOnly = true;
-            dgvUsuarios.RowHeadersWidth = 51;
-            dgvUsuarios.Size = new Size(575, 146);
-            dgvUsuarios.TabIndex = 4;
-            // 
             // FrmUsuarios
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Desktop;
             ClientSize = new Size(800, 450);
-            Controls.Add(dgvUsuarios);
             Controls.Add(lblMenu);
             Controls.Add(lblTitulo);
             Controls.Add(btnAgregarUsuario);
@@ -108,7 +93,6 @@
             Name = "FrmUsuarios";
             Text = "Administración";
             Load += FrmUsuarios_Load;
-            ((System.ComponentModel.ISupportInitialize)dgvUsuarios).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -119,6 +103,5 @@
         private Button btnAgregarUsuario;
         private Label lblTitulo;
         private Label lblMenu;
-        private DataGridView dgvUsuarios;
     }
 }

@@ -8,92 +8,16 @@ namespace PI
 {
     public partial class FrmAgregarUsuario : Form
     {
-        private int codCuotaMensual;
-        private decimal importeCuotaMensual;
-
+        public int CodUsu { get; private set; }
+        public int NroSocio { get; private set; }
         public FrmAgregarUsuario()
         {
             InitializeComponent();
-
-            txtCuota.ReadOnly = true;
-            txtPeriodo.ReadOnly = true;
-        }
-
-        private void FrmAgregarUsuario_Load(object sender, EventArgs e)
-        {
-            // Mostrar el período actual.
-            txtPeriodo.Text = DateTime.Today.ToString("MM/yyyy");
-
-            // Consultar el importe de la cuota mensual.
-            CargarCuotaMensual();
-        }
-
-        private void CargarCuotaMensual()
-        {
-            try
-            {
-                Conexion conexion = new Conexion();
-
-                using (MySqlConnection cn = conexion.ObtenerConexion())
-                {
-                    cn.Open();
-
-                    string sql = @"
-                        SELECT CodCuota, Importe
-                        FROM cuota
-                        WHERE TipoCuota = 'Mensual'
-                          AND Vigente = 1
-                        ORDER BY CodCuota DESC
-                        LIMIT 1;";
-
-                    using (MySqlCommand cmd =
-                           new MySqlCommand(sql, cn))
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            codCuotaMensual =
-                                Convert.ToInt32(reader["CodCuota"]);
-
-                            importeCuotaMensual =
-                                Convert.ToDecimal(reader["Importe"]);
-
-                            txtCuota.Text =
-                                importeCuotaMensual.ToString("N2");
-                        }
-                        else
-                        {
-                            txtCuota.Clear();
-
-                            MessageBox.Show(
-                                "No hay una cuota mensual vigente.",
-                                "Cuota no disponible",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Error al cargar la cuota mensual:\n" + ex.Message,
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void lblCuotaMensualVigente_Click(object sender, EventArgs e)
-        {
         }
 
         private void btnCancelar_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 
@@ -103,6 +27,7 @@ namespace PI
             string apellido = txtApellido.Text.Trim();
             string dni = txtDni.Text.Trim();
 
+            // Validar campos obligatorios.
             if (string.IsNullOrWhiteSpace(nombre) ||
                 string.IsNullOrWhiteSpace(apellido) ||
                 string.IsNullOrWhiteSpace(dni))
@@ -115,17 +40,18 @@ namespace PI
                 return;
             }
 
+            // Validar longitud.
             if (nombre.Length > 20 || apellido.Length > 30)
             {
                 MessageBox.Show(
-                    "El nombre admite hasta 20 caracteres y " +
-                    "el apellido hasta 30.",
+                    "El nombre admite hasta 20 caracteres y el apellido hasta 30.",
                     "Validación",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
                 return;
             }
 
+            // Validar DNI.
             if (dni.Length < 7 || dni.Length > 8 ||
                 !System.Text.RegularExpressions.Regex.IsMatch(
                     dni, @"^\d+$"))
@@ -135,21 +61,19 @@ namespace PI
                     "Validación",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
+
                 txtDni.Focus();
                 return;
             }
 
+            // Validar apto médico.
             if (!chkAptoMedico.Checked)
             {
                 MessageBox.Show(
-                    "Debe confirmar que el socio presentó el apto médico.");
-                return;
-            }
-
-            if (!chkPagoRecibido.Checked)
-            {
-                MessageBox.Show(
-                    "Debe confirmar la recepción del pago inicial.");
+                    "Debe confirmar que el socio presentó el apto médico.",
+                    "Validación",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
                 return;
             }
 
@@ -176,23 +100,13 @@ namespace PI
                         {
                             if (reader.Read())
                             {
-                                int nroSocio =
-                                    Convert.ToInt32(reader["NroSocio"]);
 
-                                decimal importe =
-                                    Convert.ToDecimal(reader["ImportePagado"]);
-
-                                int mes =
-                                    Convert.ToInt32(reader["PeriodoMes"]);
-
-                                int anio =
-                                    Convert.ToInt32(reader["PeriodoAnio"]);
+                                CodUsu = Convert.ToInt32(reader["CodUsu"]);
+                                NroSocio = Convert.ToInt32(reader["NroSocio"]);
 
                                 MessageBox.Show(
                                     "Socio registrado correctamente.\n\n" +
-                                    "Número de socio: " + nroSocio + "\n" +
-                                    "Importe pagado: " + importe.ToString("C2") + "\n" +
-                                    "Período: " + mes.ToString("00") + "/" + anio,
+                                    "Número de socio: " + NroSocio,
                                     "Alta de socio",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Information);
@@ -200,17 +114,36 @@ namespace PI
                                 this.DialogResult = DialogResult.OK;
                                 this.Close();
                             }
+                            else
+                            {
+                                MessageBox.Show(
+                                    "El procedimiento no devolvió los datos del socio.",
+                                    "Error",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                            }
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                MessageBox.Show(
-                    "No se pudo registrar el socio.\n\n" + ex.Message,
-                    "Error al guardar",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                if (ex.Number == 1644)
+                {
+                    MessageBox.Show(
+                        ex.Message,
+                        "Validación de datos",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "No se pudo registrar el socio.\n\n" + ex.Message,
+                        "Error al guardar",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
             }
             catch (Exception ex)
             {
@@ -220,11 +153,6 @@ namespace PI
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
-        }
-
-        private void checkAptoMedico_CheckedChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }
