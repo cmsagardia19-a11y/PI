@@ -93,7 +93,7 @@ namespace PI
                 if (dgvSocios.Rows.Count == 0)
                 {
                     MessageBox.Show(
-                        "No hay socios registrados.",
+                        "No hay socios con cuotas de pago pendientes.",
                         "Listado de socios",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information);

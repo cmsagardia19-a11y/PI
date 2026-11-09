@@ -16,8 +16,18 @@ namespace PI
         {
         }
 
-        private void button1_Click(object sender, EventArgs e)
+
+
+        //private void button1_Click(object sender, EventArgs e)
+        //{
+        //}
+
+        private void butnListausuarios(object sender, EventArgs e)
         {
+            using (FrmSocios formularioSocios = new FrmSocios())
+            {
+                formularioSocios.ShowDialog(this);
+            }
         }
 
         private void lblTitulo_Click(object sender, EventArgs e)
