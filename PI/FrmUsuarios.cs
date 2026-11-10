@@ -16,13 +16,7 @@ namespace PI
         {
         }
 
-
-
-        //private void button1_Click(object sender, EventArgs e)
-        //{
-        //}
-
-        private void butnListausuarios(object sender, EventArgs e)
+        private void btnListaUsuarios_Click(object sender, EventArgs e)
         {
             using (FrmSocios formularioSocios = new FrmSocios())
             {

@@ -10,11 +10,15 @@
 
   <ItemGroup>
     <None Remove="appsettings.json" />
+    <None Remove="imagenes\perfil.jpg" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="imagenes\perfil.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 

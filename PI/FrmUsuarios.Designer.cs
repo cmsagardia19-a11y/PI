@@ -45,7 +45,7 @@
             btnListaUsuarios.TabIndex = 0;
             btnListaUsuarios.Text = "Lista de Usuarios";
             btnListaUsuarios.UseVisualStyleBackColor = false;
-            btnListaUsuarios.Click += butnListausuarios;
+            btnListaUsuarios.Click += btnListaUsuarios_Click;
             // 
             // btnAgregarUsuario
             // 

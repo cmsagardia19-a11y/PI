@@ -16,15 +16,6 @@
 
         #region Windows Form Designer generated code
 
-        //private void InitializeComponent()
-        //{
-        //    this.components = new System.ComponentModel.Container();
-        //    this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        //    this.ClientSize = new System.Drawing.Size(520, 570);
-        //    this.Text = "Comprobante";
-        //    this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-        //}
-
         #endregion
 
         private Label lblTitulo;
@@ -43,5 +34,7 @@
         private Label lblPeriod;
         private Label lblFormDePago;
         private Label lblImp;
+        //private Button btnImprimirPagoAux;
+        //private Button btnImprimirPago;
     }
 }
