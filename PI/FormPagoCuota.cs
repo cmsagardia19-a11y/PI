@@ -12,6 +12,9 @@ namespace PI
         private int periodoMes;
         private int periodoAnio;
         private int nroSocio;
+        private string dniSocio;
+        private string estadoSocio;
+        private DateTime fechaInscripcion;
         private readonly IPagoCuotaRepositorio _pagoRepositorio;
 
         public FormPagoCuota(int p_CodUsu, int p_NroSocio)
@@ -51,7 +54,6 @@ namespace PI
         }
 
         // Consultar datos del socio.
-
         private bool CargarDatosSocio()
         {
             try
@@ -91,6 +93,10 @@ namespace PI
 
                     return false;
                 }
+
+                dniSocio = socio.DNI;
+                estadoSocio = socio.Estado;
+                fechaInscripcion = socio.FechaInscripcion;
 
                 textBox1.Text = socio.NroSocio.ToString();
 
@@ -211,8 +217,6 @@ namespace PI
             RegistrarPago();
         }
 
-
-
         private void RegistrarPago()
         {
             try
@@ -220,6 +224,8 @@ namespace PI
                 var pago = _pagoRepositorio.RegistrarPago(
                     codUsu,
                     cmbFormaPago.Text);
+
+                estadoSocio = "Activo";
 
                 // Abrir el comprobante con los datos devueltos por el SP.
                 using (Comprobante comprobante = new Comprobante(
@@ -231,7 +237,11 @@ namespace PI
                     pago.FormaPago,
                     pago.Importe,
                     pago.PeriodoMes,
-                    pago.PeriodoAnio))
+                    pago.PeriodoAnio,
+                    p_DNI: dniSocio,
+                    p_EstadoSocio: estadoSocio,
+                    p_EstadoPago: "CUOTA AL DÍA",
+                    p_FechaInscripcion: fechaInscripcion))
                 {
                     comprobante.ShowDialog(this);
                 }
@@ -256,7 +266,6 @@ namespace PI
                     MessageBoxIcon.Error);
             }
         }
-
 
         private void btnCancelar_Click(object sender, EventArgs e)
         {

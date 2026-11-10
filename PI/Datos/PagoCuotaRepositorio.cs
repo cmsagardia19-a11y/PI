@@ -15,19 +15,24 @@ namespace Datos
                 throw new ArgumentNullException(nameof(conexion));
         }
 
+
         // Consultar los datos del socio.
-        public (bool Encontrado, int NroSocio, string Nombre, string Apellido)
+        public (bool Encontrado, int NroSocio, string Nombre, string Apellido,
+            string DNI, string Estado, DateTime FechaInscripcion)
             ObtenerDatosSocio(int codUsu)
         {
             string sql = @"
-                SELECT
-                    s.NroSocio,
-                    u.Nombre,
-                    u.Apellido
-                FROM socio s
-                INNER JOIN usuario u
-                    ON u.CodUsu = s.CodUsu
-                WHERE s.CodUsu = @CodUsu;";
+        SELECT
+            s.NroSocio,
+            u.Nombre,
+            u.Apellido,
+            u.DNI,
+            s.Estado,
+            s.FechaInscripcion
+        FROM socio s
+        INNER JOIN usuario u
+            ON u.CodUsu = s.CodUsu
+        WHERE s.CodUsu = @CodUsu;";
 
             using (MySqlConnection cn = _conexion.ObtenerConexion())
             {
@@ -40,18 +45,22 @@ namespace Datos
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (!reader.Read())
-                            return (false, 0, "", "");
+                            return (false, 0, "", "", "", "", DateTime.MinValue);
 
                         return (
                             true,
                             Convert.ToInt32(reader["NroSocio"]),
                             Convert.ToString(reader["Nombre"]),
-                            Convert.ToString(reader["Apellido"])
+                            Convert.ToString(reader["Apellido"]),
+                            Convert.ToString(reader["DNI"]),
+                            Convert.ToString(reader["Estado"]),
+                            Convert.ToDateTime(reader["FechaInscripcion"])
                         );
                     }
                 }
             }
         }
+
 
         // Consultar la cuota vigente y verificar pagos anteriores.
         public (bool ExisteCuota, decimal Importe, int PeriodoMes,

@@ -5,7 +5,8 @@ namespace Datos
 {
     public interface IPagoCuotaRepositorio
     {
-        (bool Encontrado, int NroSocio, string Nombre, string Apellido)
+        (bool Encontrado, int NroSocio, string Nombre, string Apellido,
+            string DNI, string Estado, DateTime FechaInscripcion)
             ObtenerDatosSocio(int codUsu);
 
         (bool ExisteCuota, decimal Importe, int PeriodoMes,
