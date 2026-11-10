@@ -59,5 +59,11 @@ namespace PI
                 }
             }
         }
+
+        private void btnEntradaDiaria_Click(object sender, EventArgs e)
+        {
+            FrmEntradaDiaria formulario = new FrmEntradaDiaria();
+            formulario.ShowDialog();
+        }
     }
 }

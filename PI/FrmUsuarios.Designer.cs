@@ -32,16 +32,17 @@
             btnAgregarUsuario = new Button();
             lblTitulo = new Label();
             lblMenu = new Label();
+            btnEntradaDiaria = new Button();
             SuspendLayout();
             // 
             // btnListaUsuarios
             // 
             btnListaUsuarios.BackColor = SystemColors.ControlLightLight;
-            btnListaUsuarios.Font = new Font("Segoe UI Semibold", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnListaUsuarios.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnListaUsuarios.ForeColor = SystemColors.Desktop;
-            btnListaUsuarios.Location = new Point(65, 142);
+            btnListaUsuarios.Location = new Point(251, 347);
             btnListaUsuarios.Name = "btnListaUsuarios";
-            btnListaUsuarios.Size = new Size(297, 106);
+            btnListaUsuarios.Size = new Size(282, 52);
             btnListaUsuarios.TabIndex = 0;
             btnListaUsuarios.Text = "Lista de Usuarios";
             btnListaUsuarios.UseVisualStyleBackColor = false;
@@ -49,23 +50,23 @@
             // 
             // btnAgregarUsuario
             // 
-            btnAgregarUsuario.Font = new Font("Segoe UI Semibold", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAgregarUsuario.Location = new Point(427, 142);
+            btnAgregarUsuario.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnAgregarUsuario.Location = new Point(77, 237);
             btnAgregarUsuario.Name = "btnAgregarUsuario";
-            btnAgregarUsuario.Size = new Size(317, 106);
+            btnAgregarUsuario.Size = new Size(268, 54);
             btnAgregarUsuario.TabIndex = 1;
-            btnAgregarUsuario.Text = "Agregar Usuario";
+            btnAgregarUsuario.Text = "Agregar Socio";
             btnAgregarUsuario.UseVisualStyleBackColor = true;
             btnAgregarUsuario.Click += btnAgregarUsuario_Click;
             // 
             // lblTitulo
             // 
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Segoe UI", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblTitulo.Font = new Font("Segoe UI", 19.8000011F, FontStyle.Bold | FontStyle.Underline, GraphicsUnit.Point, 0);
             lblTitulo.ForeColor = SystemColors.ControlLightLight;
-            lblTitulo.Location = new Point(342, 21);
+            lblTitulo.Location = new Point(318, 35);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(102, 31);
+            lblTitulo.Size = new Size(159, 46);
             lblTitulo.TabIndex = 2;
             lblTitulo.Text = "Usuarios";
             lblTitulo.Click += lblTitulo_Click;
@@ -73,12 +74,24 @@
             // lblMenu
             // 
             lblMenu.AutoSize = true;
+            lblMenu.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblMenu.ForeColor = SystemColors.ControlLightLight;
-            lblMenu.Location = new Point(290, 73);
+            lblMenu.Location = new Point(252, 120);
             lblMenu.Name = "lblMenu";
-            lblMenu.Size = new Size(200, 20);
+            lblMenu.Size = new Size(281, 28);
             lblMenu.TabIndex = 3;
             lblMenu.Text = "Menú de Gestión de usuarios";
+            // 
+            // btnEntradaDiaria
+            // 
+            btnEntradaDiaria.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnEntradaDiaria.Location = new Point(447, 237);
+            btnEntradaDiaria.Name = "btnEntradaDiaria";
+            btnEntradaDiaria.Size = new Size(300, 54);
+            btnEntradaDiaria.TabIndex = 4;
+            btnEntradaDiaria.Text = "Agregar No Socio";
+            btnEntradaDiaria.UseVisualStyleBackColor = true;
+            btnEntradaDiaria.Click += btnEntradaDiaria_Click;
             // 
             // FrmUsuarios
             // 
@@ -86,6 +99,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Desktop;
             ClientSize = new Size(800, 450);
+            Controls.Add(btnEntradaDiaria);
             Controls.Add(lblMenu);
             Controls.Add(lblTitulo);
             Controls.Add(btnAgregarUsuario);
@@ -103,5 +117,7 @@
         private Button btnAgregarUsuario;
         private Label lblTitulo;
         private Label lblMenu;
+        //private Button btnEntradaDiaria;
+        private Button btnEntradaDiaria;
     }
 }
