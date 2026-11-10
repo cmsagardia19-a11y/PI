@@ -40,11 +40,11 @@
             btnListaUsuarios.BackColor = SystemColors.ControlLightLight;
             btnListaUsuarios.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnListaUsuarios.ForeColor = SystemColors.Desktop;
-            btnListaUsuarios.Location = new Point(251, 347);
+            btnListaUsuarios.Location = new Point(205, 346);
             btnListaUsuarios.Name = "btnListaUsuarios";
-            btnListaUsuarios.Size = new Size(282, 52);
+            btnListaUsuarios.Size = new Size(406, 52);
             btnListaUsuarios.TabIndex = 0;
-            btnListaUsuarios.Text = "Lista de Usuarios";
+            btnListaUsuarios.Text = "Socios: Cuotas pendientes";
             btnListaUsuarios.UseVisualStyleBackColor = false;
             btnListaUsuarios.Click += btnListaUsuarios_Click;
             // 

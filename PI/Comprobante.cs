@@ -3,10 +3,11 @@ using System;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Windows.Forms;
+using PI.Interfaces;
 
 namespace PI
 {
-    public partial class Comprobante : Form
+    public partial class Comprobante : Form, IImprimible
     {
         private int codPago;
         private int nroSocio;
@@ -17,7 +18,6 @@ namespace PI
         private decimal importe;
         private int periodoMes;
         private int periodoAnio;
-        private Button btnImprimirPago;
         private Button btnImprimirPagoAux;
         private PrintDocument documento = new PrintDocument();
         private PrintDocument documentoPago = new PrintDocument();
@@ -57,6 +57,22 @@ namespace PI
 
         }
 
+        public void Imprimir(PrintDocument documento)
+        {
+            if (documento == null)
+                throw new ArgumentNullException(nameof(documento));
+
+            using (PrintDialog dialogo = new PrintDialog())
+            {
+                dialogo.Document = documento;
+
+                if (dialogo.ShowDialog() == DialogResult.OK)
+                {
+                    documento.Print();
+                }
+            }
+        }
+
         private void CargarComprobante()
         {
             lblCodPago.Text = codPago.ToString();
@@ -70,28 +86,12 @@ namespace PI
 
         private void btnImprimir_Click(object sender, EventArgs e)
         {
-            using (PrintDialog dialogo = new PrintDialog())
-            {
-                dialogo.Document = documento;
-
-                if (dialogo.ShowDialog() == DialogResult.OK)
-                {
-                    documento.Print();
-                }
-            }
+            Imprimir(documento);
         }
 
         private void btnImprimirPago_Click(object sender, EventArgs e)
         {
-            using (PrintDialog dialogo = new PrintDialog())
-            {
-                dialogo.Document = documentoPago;
-
-                if (dialogo.ShowDialog() == DialogResult.OK)
-                {
-                    documentoPago.Print();
-                }
-            }
+            Imprimir(documentoPago);
         }
 
         private void DocumentoPago_PrintPage(
@@ -180,7 +180,6 @@ namespace PI
 
             e.HasMorePages = false;
         }
-
 
         private void Documento_PrintPage(
             object sender,
@@ -570,6 +569,11 @@ namespace PI
                     documentoPago.Print();
                 }
             }
+        }
+
+        void IImprimible.Imprimir(PrintDocument documento)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,16 +1,23 @@
-﻿
-using System;
+﻿using System;
 using System.Windows.Forms;
-using MySql.Data.MySqlClient;
 using Datos;
 
 namespace PI
 {
     public partial class Login : Form
     {
-        public Login()
+        private readonly ILoginRepositorio _loginRepositorio;
+
+        public Login() : this(new LoginRepositorio(new Conexion()))
+        {
+        }
+
+        public Login(ILoginRepositorio loginRepositorio)
         {
             InitializeComponent();
+
+            _loginRepositorio = loginRepositorio ??
+                throw new ArgumentNullException(nameof(loginRepositorio));
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -40,76 +47,49 @@ namespace PI
 
             try
             {
-                Conexion conexion = new Conexion();
+                int codUsu;
+                int rol;
+                string nombre;
+                string apellido;
 
-                using (MySqlConnection cn = conexion.ObtenerConexion())
+                bool usuarioEncontrado =
+                    _loginRepositorio.ValidarCredenciales(
+                        usuario,
+                        contraseña,
+                        out codUsu,
+                        out nombre,
+                        out apellido,
+                        out rol);
+
+                if (!usuarioEncontrado)
                 {
-                    cn.Open();
+                    MessageBox.Show(
+                        "Usuario o contraseña incorrectos, " +
+                        "o usuario inactivo.",
+                        "Acceso denegado",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
 
-                    string sql = @"
-                        SELECT CodUsu, Nombre, Apellido, RolUsu
-                        FROM usuario
-                        WHERE Nombre = @usuario
-                          AND PassUsu = @contrasena
-                          AND Activo = 1
-                        LIMIT 1;";
-
-                    using (MySqlCommand cmd =
-                           new MySqlCommand(sql, cn))
-                    {
-                        cmd.Parameters.AddWithValue(
-                            "@usuario", usuario);
-
-                        cmd.Parameters.AddWithValue(
-                            "@contrasena", contraseña);
-
-                        using (MySqlDataReader reader =
-                               cmd.ExecuteReader())
-                        {
-                            // Verificar si existe el usuario.
-                            if (!reader.Read())
-                            {
-                                MessageBox.Show(
-                                    "Usuario o contraseña incorrectos, " +
-                                    "o usuario inactivo.",
-                                    "Acceso denegado",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Warning);
-
-                                return;
-                            }
-
-                            // Obtener los datos antes de cerrar el lector.
-                            int rol = Convert.ToInt32(
-                                reader["RolUsu"]);
-
-                            string nombre =
-                                reader["Nombre"].ToString() ?? "";
-
-                            string apellido =
-                                reader["Apellido"].ToString() ?? "";
-
-                            // Validar que sea administrador.
-                            if (rol != 1)
-                            {
-                                MessageBox.Show(
-                                    "El usuario no tiene permisos " +
-                                    "de administrador.",
-                                    "Acceso denegado",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Warning);
-
-                                return;
-                            }
-
-                            MessageBox.Show(
-                                $"Bienvenido, {nombre} {apellido}.",
-                                "Acceso correcto",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
-                        }
-                    }
+                    return;
                 }
+
+                if (rol != 1)
+                {
+                    MessageBox.Show(
+                        "El usuario no tiene permisos " +
+                        "de administrador.",
+                        "Acceso denegado",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+
+                    return;
+                }
+
+                MessageBox.Show(
+                    $"Bienvenido, {nombre} {apellido}.",
+                    "Acceso correcto",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
 
                 this.Hide();
 
@@ -122,7 +102,6 @@ namespace PI
 
                 formulario.Show();
                 formulario.Activate();
-
             }
             catch (Exception ex)
             {

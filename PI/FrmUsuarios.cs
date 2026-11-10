@@ -1,9 +1,9 @@
-﻿
-using System;
+﻿using System;
 using System.Windows.Forms;
-//
+
 namespace PI
 {
+    // Herencia: FrmUsuarios hereda de Form
     public partial class FrmUsuarios : Form
     {
         public FrmUsuarios()
@@ -11,11 +11,11 @@ namespace PI
             InitializeComponent();
         }
 
-
         private void FrmUsuarios_Load(object sender, EventArgs e)
         {
         }
 
+        //Encapsulamiento: Evento privado
         private void btnListaUsuarios_Click(object sender, EventArgs e)
         {
             using (FrmSocios formularioSocios = new FrmSocios())
@@ -28,6 +28,7 @@ namespace PI
         {
         }
 
+        //Encapsulamiento: Evento privado
         private void btnAgregarUsuario_Click(object sender, EventArgs e)
         {
             using (FrmAgregarUsuario formulario = new FrmAgregarUsuario())
@@ -36,7 +37,6 @@ namespace PI
 
                 if (resultado == DialogResult.OK)
                 {
-                    // Recuperar los datos del socio creado
                     int codUsu = formulario.CodUsu;
                     int nroSocio = formulario.NroSocio;
 
@@ -47,10 +47,10 @@ namespace PI
                             "Error",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Error);
+
                         return;
                     }
 
-                    // Abrir el formulario de pago
                     using (FormPagoCuota formularioPago =
                            new FormPagoCuota(codUsu, nroSocio))
                     {
@@ -60,10 +60,13 @@ namespace PI
             }
         }
 
+        //Encapsulamiento: Evento privado
         private void btnEntradaDiaria_Click(object sender, EventArgs e)
         {
-            FrmEntradaDiaria formulario = new FrmEntradaDiaria();
-            formulario.ShowDialog();
+            using (FrmEntradaDiaria formulario = new FrmEntradaDiaria())
+            {
+                formulario.ShowDialog(this);
+            }
         }
     }
 }

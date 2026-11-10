@@ -12,15 +12,29 @@ namespace PI
         private int periodoMes;
         private int periodoAnio;
         private int nroSocio;
+        private readonly IPagoCuotaRepositorio _pagoRepositorio;
 
         public FormPagoCuota(int p_CodUsu, int p_NroSocio)
+            : this(
+                p_CodUsu,
+                p_NroSocio,
+                new PagoCuotaRepositorio(new Conexion()))
+        {
+        }
+
+        public FormPagoCuota(
+            int p_CodUsu,
+            int p_NroSocio,
+            IPagoCuotaRepositorio pagoRepositorio)
         {
             InitializeComponent();
 
             codUsu = p_CodUsu;
             nroSocio = p_NroSocio;
-        }
 
+            _pagoRepositorio = pagoRepositorio ??
+                throw new ArgumentNullException(nameof(pagoRepositorio));
+        }
         private void FormPagoCuota_Load(object sender, EventArgs e)
         {
             btnPagar.Enabled = false;
@@ -53,65 +67,35 @@ namespace PI
                     return false;
                 }
 
-                Conexion conexion = new Conexion();
+                var socio = _pagoRepositorio.ObtenerDatosSocio(codUsu);
 
-                using (MySqlConnection cn = conexion.ObtenerConexion())
+                if (!socio.Encontrado)
                 {
-                    cn.Open();
+                    MessageBox.Show(
+                        "No se encontró el socio.",
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
 
-                    string sql = @"
-                SELECT
-                    s.NroSocio,
-                    u.Nombre,
-                    u.Apellido
-                FROM socio s
-                INNER JOIN usuario u
-                    ON u.CodUsu = s.CodUsu
-                WHERE s.CodUsu = @CodUsu;";
-
-                    using (MySqlCommand cmd = new MySqlCommand(sql, cn))
-                    {
-                        cmd.Parameters.AddWithValue("@CodUsu", codUsu);
-
-                        using (MySqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (!reader.Read())
-                            {
-                                MessageBox.Show(
-                                    "No se encontró el socio.",
-                                    "Error",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Warning);
-
-                                return false;
-                            }
-
-                            int nroSocioBD =
-                                Convert.ToInt32(reader["NroSocio"]);
-
-                            // Verificar que el número recibido coincida
-                            // con el que realmente tiene la base de datos.
-                            if (nroSocioBD != nroSocio)
-                            {
-                                MessageBox.Show(
-                                    "El número de socio recibido no coincide " +
-                                    "con el registrado en la base de datos.",
-                                    "Error de validación",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Error);
-
-                                return false;
-                            }
-
-                            // En el diseñador el control todavía se llama textBox1.
-                            textBox1.Text = nroSocioBD.ToString();
-
-                            txtNombreSocio.Text =
-                                reader["Nombre"].ToString() + " " +
-                                reader["Apellido"].ToString();
-                        }
-                    }
+                    return false;
                 }
+
+                if (socio.NroSocio != nroSocio)
+                {
+                    MessageBox.Show(
+                        "El número de socio recibido no coincide " +
+                        "con el registrado en la base de datos.",
+                        "Error de validación",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+
+                    return false;
+                }
+
+                textBox1.Text = socio.NroSocio.ToString();
+
+                txtNombreSocio.Text =
+                    socio.Nombre + " " + socio.Apellido;
 
                 return true;
             }
@@ -133,80 +117,39 @@ namespace PI
         {
             try
             {
-                Conexion conexion = new Conexion();
+                var cuota =
+                    _pagoRepositorio.ObtenerEstadoCuotaMensual(codUsu);
 
-                using (MySqlConnection cn = conexion.ObtenerConexion())
+                if (!cuota.ExisteCuota)
                 {
-                    cn.Open();
+                    MessageBox.Show(
+                        "No existe una cuota mensual vigente.",
+                        "Cuota no disponible",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
 
-                    string sql = @"
-                SELECT
-                    Importe,
-                    MONTH(CURDATE()) AS PeriodoMes,
-                    YEAR(CURDATE()) AS PeriodoAnio
-                FROM cuota
-                WHERE TipoCuota = 'Mensual'
-                  AND Vigente = TRUE
-                ORDER BY CodCuota DESC
-                LIMIT 1;";
+                    return false;
+                }
 
-                    using (MySqlCommand cmd = new MySqlCommand(sql, cn))
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (!reader.Read())
-                        {
-                            MessageBox.Show(
-                                "No existe una cuota mensual vigente.",
-                                "Cuota no disponible",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning);
+                periodoMes = cuota.PeriodoMes;
+                periodoAnio = cuota.PeriodoAnio;
 
-                            return false;
-                        }
+                txtCuota.Text = cuota.Importe.ToString("N2");
 
-                        decimal importe =
-                            Convert.ToDecimal(reader["Importe"]);
+                txtPeriodo.Text =
+                    periodoMes.ToString("00") + "/" + periodoAnio;
 
-                        periodoMes =
-                            Convert.ToInt32(reader["PeriodoMes"]);
+                if (cuota.PagoRegistrado)
+                {
+                    MessageBox.Show(
+                        "El socio ya tiene registrado el pago " +
+                        "correspondiente al período " +
+                        txtPeriodo.Text + ".",
+                        "Pago duplicado",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
 
-                        periodoAnio =
-                            Convert.ToInt32(reader["PeriodoAnio"]);
-
-                        txtCuota.Text = importe.ToString("N2");
-
-                        txtPeriodo.Text =
-                            periodoMes.ToString("00") + "/" + periodoAnio;
-                    }
-
-                    string sqlPago = @"
-                SELECT COUNT(*)
-                FROM pago_cuota
-                WHERE CodUsu = @CodUsu
-                  AND PeriodoMes = @PeriodoMes
-                  AND PeriodoAnio = @PeriodoAnio;";
-
-                    using (MySqlCommand cmd = new MySqlCommand(sqlPago, cn))
-                    {
-                        cmd.Parameters.AddWithValue("@CodUsu", codUsu);
-                        cmd.Parameters.AddWithValue("@PeriodoMes", periodoMes);
-                        cmd.Parameters.AddWithValue("@PeriodoAnio", periodoAnio);
-
-                        int cantidad = Convert.ToInt32(cmd.ExecuteScalar());
-
-                        if (cantidad > 0)
-                        {
-                            MessageBox.Show(
-                                "El socio ya tiene registrado el pago " +
-                                "correspondiente al período " +
-                                txtPeriodo.Text + ".",
-                                "Pago duplicado",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning);
-
-                            return false;
-                        }
-                    }
+                    return false;
                 }
 
                 return true;
@@ -269,73 +212,26 @@ namespace PI
         }
 
 
+
         private void RegistrarPago()
         {
             try
             {
-                Conexion conexion = new Conexion();
+                var pago = _pagoRepositorio.RegistrarPago(
+                    codUsu,
+                    cmbFormaPago.Text);
 
-                int codPago = 0;
-                DateTime fechaPago = DateTime.MinValue;
-                string nombre = "";
-                string apellido = "";
-                string formaPago = "";
-                decimal importe = 0;
-                int mes = 0;
-                int anio = 0;
-
-                using (MySqlConnection cn = conexion.ObtenerConexion())
-                {
-                    cn.Open();
-
-                    using (MySqlCommand cmd =
-                           new MySqlCommand("RegistrarPagoCuota", cn))
-                    {
-                        cmd.CommandType =
-                            System.Data.CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@p_CodUsu", codUsu);
-                        cmd.Parameters.AddWithValue(
-                            "@p_FormaPago", cmbFormaPago.Text);
-
-                        using (MySqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (!reader.Read())
-                            {
-                                MessageBox.Show(
-                                    "El procedimiento no devolvió los datos del pago.",
-                                    "Error",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Warning);
-
-                                return;
-                            }
-
-                            codPago = Convert.ToInt32(reader["CodPago"]);
-                            fechaPago = Convert.ToDateTime(reader["FechaPago"]);
-                            nombre = reader["Nombre"].ToString();
-                            apellido = reader["Apellido"].ToString();
-                            formaPago = reader["FormaPago"].ToString();
-                            importe = Convert.ToDecimal(reader["ImportePagado"]);
-                            mes = Convert.ToInt32(reader["PeriodoMes"]);
-                            anio = Convert.ToInt32(reader["PeriodoAnio"]);
-                        }
-                    }
-                }
-
-                // El lector y la conexión ya están cerrados.
-                // Abrimos el comprobante con los datos devueltos por el SP.
-
+                // Abrir el comprobante con los datos devueltos por el SP.
                 using (Comprobante comprobante = new Comprobante(
-                    codPago,
+                    pago.CodPago,
                     nroSocio,
-                    fechaPago,
-                    nombre,
-                    apellido,
-                    formaPago,
-                    importe,
-                    mes,
-                    anio))
+                    pago.FechaPago,
+                    pago.Nombre,
+                    pago.Apellido,
+                    pago.FormaPago,
+                    pago.Importe,
+                    pago.PeriodoMes,
+                    pago.PeriodoAnio))
                 {
                     comprobante.ShowDialog(this);
                 }

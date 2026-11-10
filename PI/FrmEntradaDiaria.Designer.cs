@@ -124,6 +124,7 @@
             btnRegistrar.TabIndex = 7;
             btnRegistrar.Text = "Registrar Entrada";
             btnRegistrar.UseVisualStyleBackColor = true;
+            btnRegistrar.Click += btnRegistrar_Click;
             // 
             // btnCancelar
             // 

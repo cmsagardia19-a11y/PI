@@ -1,18 +1,30 @@
 ﻿
-using System;
-using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 using Datos;
 
 namespace PI
 {
+    //Herencia	FrmAgregarUsuario hereda de Form.
     public partial class FrmAgregarUsuario : Form
     {
         public int CodUsu { get; private set; }
         public int NroSocio { get; private set; }
-        public FrmAgregarUsuario()
+        //Polimorfismo: El formulario trabaja con IUsuarioRepositorio
+        //Encapsulamiento: El repositorio oculta los detalles de conexión
+        //y ejecución SQL.
+        //Abstracción: IUsuarioRepositorio define la operación de registrar un socio.
+        private readonly IUsuarioRepositorio _usuarioRepositorio;
+        public FrmAgregarUsuario() : this(
+            new UsuarioRepositorio(new Conexion()))
+        {
+        }
+
+        public FrmAgregarUsuario(IUsuarioRepositorio usuarioRepositorio)
         {
             InitializeComponent();
+
+            _usuarioRepositorio = usuarioRepositorio ??
+                throw new ArgumentNullException(nameof(usuarioRepositorio));
         }
 
         private void btnCancelar_Click(object sender, EventArgs e)
@@ -20,6 +32,7 @@ namespace PI
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
+
 
         private void btnGuardar_Click(object sender, EventArgs e)
         {
@@ -79,52 +92,24 @@ namespace PI
 
             try
             {
-                Conexion conexion = new Conexion();
+                var resultado = _usuarioRepositorio.RegistrarSocio(
+                    nombre,
+                    apellido,
+                    dni,
+                    true);
 
-                using (MySqlConnection cn = conexion.ObtenerConexion())
-                {
-                    cn.Open();
+                CodUsu = resultado.CodUsu;
+                NroSocio = resultado.NroSocio;
 
-                    using (MySqlCommand cmd =
-                           new MySqlCommand("AltaSocio", cn))
-                    {
-                        cmd.CommandType =
-                            System.Data.CommandType.StoredProcedure;
+                MessageBox.Show(
+                    "Socio registrado correctamente.\n\n" +
+                    "Número de socio: " + NroSocio,
+                    "Alta de socio",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
 
-                        cmd.Parameters.AddWithValue("@p_Nombre", nombre);
-                        cmd.Parameters.AddWithValue("@p_Apellido", apellido);
-                        cmd.Parameters.AddWithValue("@p_DNI", dni);
-                        cmd.Parameters.AddWithValue("@p_AptoMedico", true);
-
-                        using (MySqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-
-                                CodUsu = Convert.ToInt32(reader["CodUsu"]);
-                                NroSocio = Convert.ToInt32(reader["NroSocio"]);
-
-                                MessageBox.Show(
-                                    "Socio registrado correctamente.\n\n" +
-                                    "Número de socio: " + NroSocio,
-                                    "Alta de socio",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Information);
-
-                                this.DialogResult = DialogResult.OK;
-                                this.Close();
-                            }
-                            else
-                            {
-                                MessageBox.Show(
-                                    "El procedimiento no devolvió los datos del socio.",
-                                    "Error",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Warning);
-                            }
-                        }
-                    }
-                }
+                this.DialogResult = DialogResult.OK;
+                this.Close();
             }
             catch (MySqlException ex)
             {

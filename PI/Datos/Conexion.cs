@@ -3,10 +3,16 @@ using MySql.Data.MySqlClient;
 
 namespace Datos
 {
-    public class Conexion
+    //Abstracción	
+    //IConexion define qué operaciones debe ofrecer una conexión,
+    //sin exponer su implementación.
+    public class Conexion : IConexion
     {
+        //Encapsulamiento	
+        //connectionString es privada y de solo lectura (readonly).
         private readonly string connectionString;
-    public Conexion()
+
+        public Conexion()
         {
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -24,5 +30,5 @@ namespace Datos
             return new MySqlConnection(connectionString);
         }
     }
-
 }
+

@@ -3,15 +3,32 @@ using Datos;
 using MySql.Data.MySqlClient;
 using System;
 using System.Data;
+using System.Diagnostics.Contracts;
+using System.Net;
 using System.Windows.Forms;
 
 namespace PI
 {
+    //Herencia
+    //FrmEntradaDiaria hereda de Form.
     public partial class FrmEntradaDiaria : Form
     {
-        public FrmEntradaDiaria()
+        //Encapsulamiento:
+        //_conexion es privado y readonly.
+        //Polimorfismo:
+        //El formulario recibe una referencia IConexion, que puede
+        //representar distintas implementaciones.
+        private readonly IConexion _conexion;
+
+        public FrmEntradaDiaria() : this(new Conexion())
+        {
+        }
+
+        public FrmEntradaDiaria(IConexion conexion)
         {
             InitializeComponent();
+
+            _conexion = conexion ?? throw new ArgumentNullException(nameof(conexion));
 
             // Configurar las formas de pago
             cmbFormaPago.Items.Add("Efectivo");
@@ -73,17 +90,22 @@ namespace PI
 
             try
             {
-                Conexion conexion = new Conexion();
+                int codEntrada = 0;
+                DateTime fechaIngreso = DateTime.MinValue;
+                DateTime fechaVencimiento = DateTime.MinValue;
+                decimal importe = 0;
 
-                using (MySqlConnection cn = conexion.ObtenerConexion())
+                string nombre = "";
+                string apellido = "";
+                string formaPago = cmbFormaPago.Text;
+
+                using (MySqlConnection cn = _conexion.ObtenerConexion())
                 {
                     cn.Open();
 
                     using (MySqlCommand cmd =
                         new MySqlCommand("RegistrarEntradaDiaria", cn))
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        {
                         cmd.CommandType = CommandType.StoredProcedure;
 
                         cmd.Parameters.AddWithValue(
@@ -92,62 +114,74 @@ namespace PI
                         cmd.Parameters.AddWithValue(
                             "@p_Apellido", txtApellido.Text.Trim());
 
+                        // IMPORTANTE: enviar el DNI ingresado
                         cmd.Parameters.AddWithValue(
                             "@p_DNI", dni);
 
                         cmd.Parameters.AddWithValue(
-                            "@p_FormaPago", cmbFormaPago.Text);
+                            "@p_FormaPago", formaPago);
 
                         using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
                             {
-                                int codEntrada =
-                                    Convert.ToInt32(reader["CodEntrada"]);
+                                codEntrada = Convert.ToInt32(reader["CodEntrada"]);
 
-                                DateTime fechaIngreso =
+                                fechaIngreso =
                                     Convert.ToDateTime(reader["FechaIngreso"]);
 
-                                DateTime fechaVencimiento =
+                                fechaVencimiento =
                                     Convert.ToDateTime(reader["FechaVencimiento"]);
 
-                                decimal importe =
+                                importe =
                                     Convert.ToDecimal(reader["Importe"]);
 
-                                string nombre =
-                                    reader["Nombre"].ToString();
-
-                                string apellido =
-                                    reader["Apellido"].ToString();
-
-                                string formaPago =
-                                    reader["FormaPago"].ToString();
-
-                                MessageBox.Show(
-                                    "¡Entrada diaria registrada correctamente!\n\n" +
-                                    "Código de entrada: " + codEntrada + "\n" +
-                                    "Nombre: " + nombre + " " + apellido + "\n" +
-                                    "DNI: " + dni + "\n" +
-                                    "Fecha de ingreso: " +
-                                    fechaIngreso.ToString("dd/MM/yyyy HH:mm") + "\n" +
-                                    "Vencimiento: " +
-                                    fechaVencimiento.ToString("dd/MM/yyyy HH:mm") + "\n" +
-                                    "Forma de pago: " + formaPago + "\n" +
-                                    "Importe: " + importe.ToString("C2"),
-                                    "Entrada registrada",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Information);
-                                }
+                                nombre = reader["Nombre"].ToString();
+                                apellido = reader["Apellido"].ToString();
+                                formaPago = reader["FormaPago"].ToString();
                             }
                         }
                     }
+                }
+
+                // Abrir comprobante una vez registrado el ingreso
+                if (codEntrada > 0)
+                {
+                    using (ComprobanteEntradaDiaria comprobante =
+                        new ComprobanteEntradaDiaria(
+                            codEntrada,
+                            nombre,
+                            apellido,
+                            dni,
+                            fechaIngreso,
+                            fechaVencimiento,
+                            formaPago,
+                            importe))
+                    {
+                        comprobante.ShowDialog();
+                    }
+
+                    // Limpiar los campos después de cerrar el comprobante
+                    txtNombre.Clear();
+                    txtApellido.Clear();
+                    txtDNI.Clear();
+                    cmbFormaPago.SelectedIndex = -1;
+
+                    txtNombre.Focus();
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "No se pudo obtener el comprobante de la entrada registrada.",
+                        "Aviso",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
                 }
             }
             catch (MySqlException ex)
             {
                 MessageBox.Show(
-                    "Error al registrar la entrada en la base de datos:\n" +
-                    ex.Message,
+                    "Error al registrar la entrada en la base de datos:\n" + ex.Message,
                     "Error MySQL",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
@@ -162,9 +196,12 @@ namespace PI
             }
         }
 
+
+
         private void btnCancelar_Click(object sender, EventArgs e)
         {
             this.Close();
         }
+
     }
 }

@@ -11,9 +11,23 @@ namespace PI
 {
     public partial class FrmSocios : Form
     {
-        public FrmSocios()
+        //Encapsulamiento: _conexion y _socioRepositorio son privados y
+        //readonly.
+        private readonly IConexion _conexion;
+        //Polimorfismo: SocioRepositorio implementa ISocioRepositorio;
+        //el formulario trabaja con la interfaz.
+        private readonly ISocioRepositorio _socioRepositorio;
+        public FrmSocios() : this(
+            new SocioRepositorio(new Conexion()))
+        {
+        }
+
+        public FrmSocios(ISocioRepositorio socioRepositorio)
         {
             InitializeComponent();
+
+            _socioRepositorio = socioRepositorio ??
+                throw new ArgumentNullException(nameof(socioRepositorio));
         }
 
         private void FrmSocios_Load(object sender, EventArgs e)
@@ -21,65 +35,15 @@ namespace PI
             CargarSocios();
         }
 
+
         private void CargarSocios()
         {
-            string consulta = @"
-                SELECT
-                    s.NroSocio AS 'Nro. Socio',
-                    u.DNI AS 'DNI',
-                    u.Nombre AS 'Nombre',
-                    u.Apellido AS 'Apellido',
-                    s.FechaInscripcion AS 'Fecha de Inscripción',
-                    s.Estado AS 'Estado',
-                    CASE
-                        WHEN s.AptoMedico = 1 THEN 'Sí'
-                        ELSE 'No'
-                    END AS 'Apto Médico',
-                    DATE_ADD(
-                        DATE(p.FechaPago),
-                        INTERVAL 1 MONTH
-                    ) AS 'Fecha de Vencimiento'
-
-                FROM socio s
-
-                INNER JOIN usuario u
-                    ON u.CodUsu = s.CodUsu
-
-                INNER JOIN pago_cuota p
-                    ON p.CodPago = (
-                        SELECT p2.CodPago
-                        FROM pago_cuota p2
-                        WHERE p2.CodUsu = s.CodUsu
-                        ORDER BY p2.FechaPago DESC, p2.CodPago DESC
-                        LIMIT 1
-                    )
-
-                WHERE u.RolUsu = 3
-                    AND DATE_ADD(
-                        DATE(p.FechaPago),
-                        INTERVAL 1 MONTH
-                        ) = CURDATE()
-
-                ORDER BY s.NroSocio;";
             try
             {
-                Conexion conexion = new Conexion();
+                DataTable tabla =
+                    _socioRepositorio.ObtenerSociosConCuotasPendientes();
 
-                using (MySqlConnection cn =
-                    conexion.ObtenerConexion())
-                {
-                    cn.Open();
-
-                    using (MySqlDataAdapter adaptador =
-                        new MySqlDataAdapter(consulta, cn))
-                    {
-                        DataTable tabla = new DataTable();
-
-                        adaptador.Fill(tabla);
-
-                        dgvSocios.DataSource = tabla;
-                    }
-                }
+                dgvSocios.DataSource = tabla;
 
                 dgvSocios.AutoSizeColumnsMode =
                     DataGridViewAutoSizeColumnsMode.Fill;
