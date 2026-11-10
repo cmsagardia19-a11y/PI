@@ -9,7 +9,7 @@ namespace PI
 {
     public partial class Comprobante : Form, IImprimible
     {
-        private const string nombreClub = "IFTS N° 29 - DSOO";
+        private const string nombreClub = "IFTS N° 29 - DSOO G4";
         private int codPago;
         private int nroSocio;
         private DateTime fechaPago;
